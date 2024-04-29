@@ -8,4 +8,7 @@ public class Sredni extends Przesylka {
     public Sredni(String typPrzesylki, int ilosc, SposobDostawy sposobDostawy) {
         super(typPrzesylki, ilosc, sposobDostawy, SREDNI);
     }
+    public Sredni(Przesylka przesylka){
+        super(przesylka.getTypPrzesylki(), przesylka.getIlosc(), przesylka.getSposobDostawy(), SREDNI);
+    }
 }

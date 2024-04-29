@@ -5,9 +5,16 @@ import model.enums.RozmiarPrzesylki;
 import model.enums.SposobDostawy;
 import model.listy.Koszyk;
 import model.listy.ListaZamowien;
-import model.przesylki.*;
+import model.przesylki.Maxi;
+import model.przesylki.Mini;
+import model.przesylki.Przesylka;
+import model.przesylki.Sredni;
+import service.PrzesylkaService;
 
 import java.util.ArrayList;
+import java.util.Optional;
+
+import static service.CenaService.calculatePrice;
 
 
 public class Klient {
@@ -54,34 +61,36 @@ public class Klient {
         // ustawiamy cene przesylki w momencie dodania na cene wyliczoną na bazie aktualnego abonamentu (w celu zapamiętania ceny przesyłki z chwili dodania
         p.wyliczAktualnaCene();
 
-        try {
-            //sprawdzamy czy przesylka o danych parametrach widnieje w naszej historii zamowien
-            //zapisujemy ją w zmiennej przesylka1
-            Przesylka przesylka1 = getPoprzednioZamowione().getPrzesylki()
-                    .stream()
-                    .filter(przesylka -> przesylka.getTypPrzesylki().equals(p.getTypPrzesylki()) &&
-                            przesylka.getSposobDostawy().equals(p.getSposobDostawy()) &&
-                            przesylka.getRozmiarPrzesylki().equals(p.getRozmiarPrzesylki()) &&
-                            przesylka.getCena() == p.getCena())
-                    .findFirst()
-                    //podnosimy wyjatek mowiacy nam o braku takiej przeyslki
-                    .orElseThrow(() -> new RuntimeException("nie znaleziono podanej przesylki w historii zamowien"));
-
-            //dodajemy znaleziona przesylke do koszyka
-            koszyk.getPrzesylki().add(przesylka1);
-            //zwracamy klientowi do portfela(kwota) cene przesylki
-            kwota += przesylka1.getCena();
-            //usuwamy przesylke z historii zamowien
-            getPoprzednioZamowione().getPrzesylki().remove(przesylka1);
-        } catch (RuntimeException e) {
-            System.err.println(e.getMessage());
-        }
+        //sprawdzamy czy przesylka o danych parametrach widnieje w naszej historii zamowien
+        //zapisujemy ją w zmiennej przesylka1(jesli istnieje)
+        Optional<Przesylka> przesylka1 = getPoprzednioZamowione().getPrzesylki()
+                .stream()
+                .filter(przesylka -> przesylka.getTypPrzesylki().equals(p.getTypPrzesylki()) &&
+                        przesylka.getSposobDostawy().equals(p.getSposobDostawy()) &&
+                        przesylka.getRozmiarPrzesylki().equals(p.getRozmiarPrzesylki()) &&
+                        przesylka.getCena() == p.getCena() &&
+                        przesylka.getIlosc() >= i)
+                .findFirst();
+        //jezeli znajdziemy przesyłkę
+        przesylka1.ifPresentOrElse(przesylka -> {
+                    int iloscDoZostawieniaWHistorii = przesylka.getIlosc() - i;
+                    getPoprzednioZamowione().getPrzesylki().remove(przesylka);
+                    przesylka.setIlosc(i);
+                    koszyk.getPrzesylki().add(przesylka);
+                    kwota += przesylka.getCena();
+                    Przesylka przesylkaCopy = PrzesylkaService.copyPrzesylka(przesylka);
+                    przesylkaCopy.setIlosc(iloscDoZostawieniaWHistorii);
+                    if (przesylkaCopy.getIlosc() > 0)
+                        getPoprzednioZamowione().getPrzesylki().add(przesylkaCopy);
+                }, //jesli nie znajdziemy przesylki
+                () -> System.out.println("NIE ZNALEZIONO PRZESYLKI O PODANYCH PARAMETRACH LUB PODANA" +
+                        "DO ZWROTU ILOSC JEST WIEKSZA NIZ ILOSC ZAKUPIONYCH PRZESYLEK PODANEGO TYPI"));
     }
 
     //przerzucamy przesylki z listyZamowien do koszyka ze specyfikacja ze przesylki znajdujace sie w koszyku muszą posiadać swoją pozycje w cenniku
     public void przepakuj() {
-        ArrayList<Przesylka> nowaListaZyczen = new ArrayList<>(listaZyczen.getPrzesylki().stream().filter(x -> x.calculatePrice(this.getHasAbonament()) == 0).toList());
-        ArrayList<Przesylka> listaDoKoszyka = new ArrayList<>(listaZyczen.getPrzesylki().stream().filter(x -> x.calculatePrice(this.getHasAbonament()) != 0).toList());
+        ArrayList<Przesylka> nowaListaZyczen = new ArrayList<>(listaZyczen.getPrzesylki().stream().filter(x -> calculatePrice(x, this.getHasAbonament()) == 0).toList());
+        ArrayList<Przesylka> listaDoKoszyka = new ArrayList<>(listaZyczen.getPrzesylki().stream().filter(x -> calculatePrice(x, this.getHasAbonament()) != 0).toList());
         koszyk.ustawKoszyk(listaDoKoszyka);
         listaZyczen.ustawListe(nowaListaZyczen);
     }
@@ -90,14 +99,11 @@ public class Klient {
     public void zaplac(RodzajePlatnosci platnosc) {
         //sortujemy nasz koszyk bazując na cenie -> od najmniejszej do największej
 
-
-        this.koszyk.getPrzesylki().sort((x, y) -> (int) (x.calculatePrice(this.getHasAbonament()) - y.calculatePrice(this.getHasAbonament())));
+        this.koszyk.getPrzesylki().sort((x, y) -> (int) (calculatePrice(x, this.getHasAbonament()) - calculatePrice(y, this.getHasAbonament())));
         this.koszyk.getPrzesylki()
                 .forEach(x -> {
-                    //w zaleznosci od rodzaju platnosci wyliczamy cene
-                    double cena = (x.calculatePrice(this.getHasAbonament()) * ((platnosc == RodzajePlatnosci.KARTA) ? 1.01 : 1));
+                    double cena = (calculatePrice(x, this.getHasAbonament()) * ((platnosc == RodzajePlatnosci.KARTA) ? 1.01 : 1));
                     int il = x.getIlosc();
-                    //iteracyjnie przechodzimy po przesylkach -> jesli stac nas na zakup 1 sztuki zmniejszamy ilosc przesylek o 0 i kwote w portfelu o cene przeyslki oraz dodajemy zakupiona przesylke do listy zamowien
                     for (int i = 0; i < il; i++) {
                         if (kwota - cena >= 0) {
                             kwota -= cena;
@@ -108,15 +114,12 @@ public class Klient {
                         }
                     }
                 });
-        //dodajemy przesylki ktorych ilosc jest rozna od 0 spowrotem do koszyka
         this.koszyk.ustawListe(new ArrayList<>(this.koszyk.getPrzesylki().stream().filter(x -> x.getIlosc() != 0).toList()));
-        //zaokraglamy kwote do 2 miejsc po przecinku
         kwota = (double) Math.round(kwota * 100) / 100;
 
     }
 
-
-    //setter abonamentu robi troche wiecej ze wzgledu na to ze przy zmianie stanu abonamentu u uzytkownika chcemy zmienic ten stan takze w podleglym mu koszyku i podleglych mu produktach
+    //w wypadku gdyby stan abonamentu klienta mial ulec zmianie (mozna usunac badz stestowac w mainie dzialanie metod po zmianei abonamentu)
     public void setHasAbonament(boolean hasAbonament) {
         this.hasAbonament = hasAbonament;
         listaZyczen.getPrzesylki().forEach(przesylka -> przesylka.setHasAbonament(hasAbonament));

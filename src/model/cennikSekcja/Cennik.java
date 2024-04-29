@@ -9,9 +9,9 @@ public class Cennik {
         return listaCen;
     }
 
+    static final int BRAK_CENY_W_CENNIKU = -1;
     private final ArrayList<ProduktWCenniku> listaCen;
     private static Cennik INSTANCE;
-    static final int BRAKCENYWCENNIKU = -1;
 
     private Cennik() {
         this.listaCen = new ArrayList<>();
@@ -44,13 +44,13 @@ public class Cennik {
     public void dodaj(RozmiarPrzesylki rozmiarPrzesylki, String rodzajPrzesylki,
                       int cenaDostawy, int cenaOdbioruPunkt) {
         listaCen.add(new ProduktWCenniku(rozmiarPrzesylki, rodzajPrzesylki,
-                cenaDostawy, cenaOdbioruPunkt, BRAKCENYWCENNIKU));
+                cenaDostawy, cenaOdbioruPunkt, BRAK_CENY_W_CENNIKU));
     }
 
     public void dodaj(RozmiarPrzesylki rozmiarPrzesylki, String rodzajPrzesylki,
                       int cenaDostawy) {
         listaCen.add(new ProduktWCenniku(rozmiarPrzesylki, rodzajPrzesylki,
-                cenaDostawy, BRAKCENYWCENNIKU, BRAKCENYWCENNIKU));
+                cenaDostawy, BRAK_CENY_W_CENNIKU, BRAK_CENY_W_CENNIKU));
     }
 
     @Override

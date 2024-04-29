@@ -28,20 +28,7 @@ public class ProduktWCenniku {
         };
     }
 
-    public boolean hasSposobDostawy(SposobDostawy sposobDostawy) {
-        switch (sposobDostawy) {
-            case AUTOMAT -> {
-                if (cenaOdbiorAutomat > 0) return true;
-            }
-            case KURIER -> {
-                if (cenaDostawa > 0) return true;
-            }
-            case PUNKT -> {
-                if (cenaOdbiorPunkt > 0) return true;
-            }
-        }
-        return false;
-    }
+
 
     public RozmiarPrzesylki getRozmiarPrzesylki() {
         return rozmiarPrzesylki;

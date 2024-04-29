@@ -41,7 +41,7 @@ public class ListaZamowien {
         for (Przesylka przesylka : przesylki) {
             przesylkiDoWydruku.append(przesylka.toString()).append("\n");
         }
-        return getNazwaWlascicielaKoszyka() + "\n" + przesylkiDoWydruku;
+        return getNazwaWlascicielaKoszyka() + ":\n" + przesylkiDoWydruku;
     }
 
     public ArrayList<Przesylka> getPrzesylki() {
