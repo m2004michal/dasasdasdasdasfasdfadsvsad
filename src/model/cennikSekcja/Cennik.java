@@ -11,6 +11,7 @@ public class Cennik {
 
     private final ArrayList<ProduktWCenniku> listaCen;
     private static Cennik INSTANCE;
+    static final int BRAKCENYWCENNIKU = -1;
 
     private Cennik() {
         this.listaCen = new ArrayList<>();
@@ -26,25 +27,30 @@ public class Cennik {
 
     public void dodaj(RozmiarPrzesylki rozmiarPrzesylki, String rodzajPrzesylki,
                       int cenaDostawy, int cenaOdbioruPunkt, int cenaOdbioruAutomat) {
-        if (listaCen.stream()
-                .filter(przesylka ->
-                        przesylka.getRozmiarPrzesylki().equals(rozmiarPrzesylki) &&
-                                przesylka.getRodzajPrzesylki().equals(rodzajPrzesylki)).toList().isEmpty()) {
-            listaCen.add(new ProduktWCenniku(rozmiarPrzesylki, rodzajPrzesylki,
-                    cenaDostawy, cenaOdbioruPunkt, cenaOdbioruAutomat));
+        ProduktWCenniku produktWCenniku = new ProduktWCenniku(rozmiarPrzesylki, rodzajPrzesylki,
+                cenaDostawy, cenaOdbioruPunkt, cenaOdbioruAutomat);
+        try {
+            listaCen.remove(listaCen.stream()
+                    .filter(szukanyProduktWCenniku -> szukanyProduktWCenniku.getRozmiarPrzesylki().equals(rozmiarPrzesylki) && szukanyProduktWCenniku.getRodzajPrzesylki().equals(rodzajPrzesylki))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("nie znaleziono pozycji w cenniku")));
+            listaCen.add(produktWCenniku);
+        } catch (RuntimeException e) {
+            listaCen.add(produktWCenniku);
         }
+
     }
 
     public void dodaj(RozmiarPrzesylki rozmiarPrzesylki, String rodzajPrzesylki,
                       int cenaDostawy, int cenaOdbioruPunkt) {
         listaCen.add(new ProduktWCenniku(rozmiarPrzesylki, rodzajPrzesylki,
-                cenaDostawy, cenaOdbioruPunkt, -1));
+                cenaDostawy, cenaOdbioruPunkt, BRAKCENYWCENNIKU));
     }
 
     public void dodaj(RozmiarPrzesylki rozmiarPrzesylki, String rodzajPrzesylki,
                       int cenaDostawy) {
         listaCen.add(new ProduktWCenniku(rozmiarPrzesylki, rodzajPrzesylki,
-                cenaDostawy, -1, -1));
+                cenaDostawy, BRAKCENYWCENNIKU, BRAKCENYWCENNIKU));
     }
 
     @Override

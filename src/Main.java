@@ -15,7 +15,7 @@ import static model.enums.SposobDostawy.*;
 public class Main {
 
     static int cena(Koszyk k, String typ) {
-
+        //pobieramy te elementy z listy ktorych typ rowny jest podanemu po czym pobieramy tylko ich ceny * ilosc a następnie dodajemy je do zmiennej cena
         double cena = k.getPrzesylki()
                 .stream()
                 .filter(x -> x.getTypPrzesylki().equals(typ))
@@ -73,11 +73,10 @@ public class Main {
 
         // Teraz przychodzi klient Żółwik,
         // deklaruje 130 zł na zamówienia
-        Klient zolwik = new Klient("Żółwik", 130, false);
+        Klient zolwik = new Klient("Żółwik", 130, true);
 
         // Zamówił za dużo jak na tę kwotę
         zolwik.dodaj(new Mini("zwykly", 4, KURIER));
-        zolwik.dodaj(new Maxi("ekspres", 5, KURIER));
 
         // Co klient Żółwik ma na swojej liście zamówień
         System.out.println("Lista zamówień klienta " + zolwik.pobierzListeZamowien());
@@ -93,12 +92,21 @@ public class Main {
 
         // klient Żółwik płaci
         zolwik.zaplac(PRZELEW);    // płaci przelewem, bez prowizji
-
         // Ile klientowi Żółwik zostało pieniędzy?
         System.out.println("Po zapłaceniu, klientowi Żółwik zostało: " + zolwik.pobierzPortfel() + " zł");
 
+        zolwik.setHasAbonament(false);
+        System.out.println("LISTA POPRZEDNICH ZAMOWIEN " + zolwik.getPoprzednioZamowione());
+        zolwik.dodaj(new Mini("zwykly", 4, KURIER));
+        zolwik.przepakuj();
+
+        System.out.println("Po przepakowaniu222222222, koszyk klienta " + zolwik.pobierzKoszyk());
+        zolwik.zaplac(PRZELEW);
+        System.out.println("Po zapłaceniu2, klientowi Żółwik zostało: " + zolwik.pobierzPortfel() + " zł");
+
         //sprawdzamy liste zrealizowanych oplaconych zamowien
         System.out.println("LISTA POPRZEDNICH ZAMOWIEN " + zolwik.getPoprzednioZamowione());
+
 
         // Co zostało w koszyku klienta Żółwik (za mało pieniędzy miał)
         System.out.println("Po zapłaceniu, koszyk klienta " + koszykZolwika);

@@ -14,11 +14,13 @@ public class ListaZamowien {
         this.nazwaWlascicielaKoszyka = nazwaWlascicielaKoszyka;
     }
 
+    //przy dodawaniu do listy sprawdzamy czy identyczny element juz w tej liscie widnieje(jesli tak zwiekszamy jego ilosc o ilosc dodawanej przesylki)(jesli nie - dodajemy produkt do listy)
     public void dodajDoListy(Przesylka przesylkaDoDodania) {
         Przesylka przesylkaDoListy = przesylki.stream()
                 .filter(przesylka -> przesylka.getTypPrzesylki().equals(przesylkaDoDodania.getTypPrzesylki()) &&
                         przesylka.getSposobDostawy().equals(przesylkaDoDodania.getSposobDostawy()) &&
-                        przesylka.getRozmiarPrzesylki().equals(przesylkaDoDodania.getRozmiarPrzesylki()))
+                        przesylka.getRozmiarPrzesylki().equals(przesylkaDoDodania.getRozmiarPrzesylki()) &&
+                        przesylka.getHasAbonament() == przesylkaDoDodania.getHasAbonament())
                 .findFirst()
                 .map(przesylka -> {
                     przesylka.setIlosc(przesylka.getIlosc() + przesylkaDoDodania.getIlosc());
@@ -26,10 +28,10 @@ public class ListaZamowien {
                     return przesylka;
                 })
                 .orElse(przesylkaDoDodania);
+
         przesylki.add(przesylkaDoListy);
 
     }
-
 
     @Override
     public String toString() {
@@ -46,16 +48,12 @@ public class ListaZamowien {
         return przesylki;
     }
 
-    public void setPrzesylki(ArrayList<Przesylka> przesylki) {
-        this.przesylki = przesylki;
-    }
-
     public String getNazwaWlascicielaKoszyka() {
         return nazwaWlascicielaKoszyka;
     }
 
     public void ustawListe(ArrayList<Przesylka> nowaListaZyczen) {
-        setPrzesylki(nowaListaZyczen);
+        this.przesylki = nowaListaZyczen;
     }
 
 }

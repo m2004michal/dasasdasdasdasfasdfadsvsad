@@ -5,6 +5,7 @@ import model.enums.SposobDostawy;
 
 public class ProduktWCenniku {
 
+
     private final RozmiarPrzesylki rozmiarPrzesylki;
     private final String rodzajPrzesylki;
     private final int cenaOdbiorPunkt;

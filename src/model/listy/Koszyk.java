@@ -13,7 +13,7 @@ public class Koszyk extends ListaZamowien {
     }
 
     public void ustawKoszyk(ArrayList<Przesylka> przesylkiZListy) {
-        setPrzesylki(przesylkiZListy);
+        ustawListe(przesylkiZListy);
     }
 
     public boolean getCzyWlascicielMaAbonament() {

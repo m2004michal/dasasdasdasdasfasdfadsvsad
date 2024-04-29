@@ -1,11 +1,8 @@
 package model.przesylki;
 
 import model.cennikSekcja.Cennik;
-import model.cennikSekcja.ProduktWCenniku;
 import model.enums.RozmiarPrzesylki;
 import model.enums.SposobDostawy;
-
-import java.util.List;
 
 
 public abstract class Przesylka {
@@ -26,18 +23,19 @@ public abstract class Przesylka {
         wyliczAktualnaCene();
     }
 
+
     public double calculatePrice(boolean hasAbonament) {
-        List<ProduktWCenniku> produkty = Cennik.pobierzCennik()
+        //szukamy w cenniku pozycji odpowiadającej parametrom naszej paczki i pobieramy cene dla danej pozycji (gdy brak zwracamy 0)
+        double cena = Cennik.pobierzCennik()
                 .getListaCen()
                 .stream()
                 .filter(x -> this.rozmiarPrzesylki == x.getRozmiarPrzesylki() &&
                         this.typPrzesylki.equals(x.getRodzajPrzesylki()) &&
                         x.hasSposobDostawy(this.sposobDostawy))
-                .toList();
-
-        if (produkty.isEmpty())
-            return 0;
-        double cena = produkty.get(0).pobierzCeneDlaTypuDostawy(this.sposobDostawy);
+                .findFirst()
+                .map(x -> x.pobierzCeneDlaTypuDostawy(this.getSposobDostawy()))
+                .orElse(0D);
+        //w przypadku abonamentu zmniejszamy cene o polowe
         if (hasAbonament)
             cena /= 2;
 
@@ -83,5 +81,9 @@ public abstract class Przesylka {
 
     public double getCena() {
         return cena;
+    }
+
+    public boolean getHasAbonament() {
+        return hasAbonament;
     }
 }
