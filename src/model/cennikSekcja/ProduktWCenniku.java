@@ -3,7 +3,7 @@ package model.cennikSekcja;
 import model.enums.RozmiarPrzesylki;
 import model.enums.SposobDostawy;
 
-public  class ProduktWCenniku{
+public class ProduktWCenniku {
 
     private final RozmiarPrzesylki rozmiarPrzesylki;
     private final String rodzajPrzesylki;
@@ -11,7 +11,7 @@ public  class ProduktWCenniku{
     private final int cenaOdbiorAutomat;
     private final int cenaDostawa;
 
-    public ProduktWCenniku(RozmiarPrzesylki rozmiarPrzesylki, String rodzajPrzesylki,  int cenaDostawa, int cenaOdbiorPunkt, int cenaOdbiorAutomat) {
+    public ProduktWCenniku(RozmiarPrzesylki rozmiarPrzesylki, String rodzajPrzesylki, int cenaDostawa, int cenaOdbiorPunkt, int cenaOdbiorAutomat) {
         this.rozmiarPrzesylki = rozmiarPrzesylki;
         this.rodzajPrzesylki = rodzajPrzesylki;
         this.cenaDostawa = cenaDostawa;
@@ -20,14 +20,15 @@ public  class ProduktWCenniku{
     }
 
     public double pobierzCeneDlaTypuDostawy(SposobDostawy sposobDostawy) {
-        return switch (sposobDostawy){
+        return switch (sposobDostawy) {
             case AUTOMAT -> this.getCenaOdbiorAutomat();
             case KURIER -> this.getCenaDostawa();
             case PUNKT -> this.getCenaOdbiorPunkt();
         };
     }
-    public boolean hasSposobDostawy(SposobDostawy sposobDostawy){
-        switch (sposobDostawy){
+
+    public boolean hasSposobDostawy(SposobDostawy sposobDostawy) {
+        switch (sposobDostawy) {
             case AUTOMAT -> {
                 if (cenaOdbiorAutomat > 0) return true;
             }

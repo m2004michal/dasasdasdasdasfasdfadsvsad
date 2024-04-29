@@ -5,8 +5,8 @@ public enum RozmiarPrzesylki {
     SREDNI,
     MAXI;
 
-    public String getValue(){
-        return switch (this){
+    public String getValue() {
+        return switch (this) {
             case MINI -> "Mini";
             case SREDNI -> "Sredni";
             case MAXI -> "Maxi";

@@ -4,10 +4,8 @@ import model.listy.Koszyk;
 import model.listy.ListaZamowien;
 import model.przesylki.Maxi;
 import model.przesylki.Mini;
-import model.przesylki.Przesylka;
 import model.przesylki.Sredni;
 
-import java.util.List;
 
 import static model.enums.RodzajePlatnosci.KARTA;
 import static model.enums.RodzajePlatnosci.PRZELEW;
@@ -17,15 +15,13 @@ import static model.enums.SposobDostawy.*;
 public class Main {
 
     static int cena(Koszyk k, String typ) {
-        int cena = 0;
-        List<Przesylka> list = k.getPrzesylki()
+
+        double cena = k.getPrzesylki()
                 .stream()
                 .filter(x -> x.getTypPrzesylki().equals(typ))
-                .toList();
-        for (Przesylka przesylka : list) {
-            cena += (int) przesylka.calculatePrice(k.getKlient().getHasAbonament()) * przesylka.getIlosc();
-        }
-        return cena;
+                .map(przesylka -> przesylka.calculatePrice(k.getCzyWlascicielMaAbonament()) * przesylka.getIlosc()).mapToDouble(cenaPrzesylek -> cenaPrzesylek).sum();
+
+        return (int) cena;
     }
 
     public static void main(String[] args) {
@@ -44,12 +40,22 @@ public class Main {
         blyskawica.dodaj(new Sredni("zwykly", 3, KURIER));
         blyskawica.dodaj(new Maxi("ekspres", 2, KURIER));
         blyskawica.dodaj(new Mini("ekspres", 4, AUTOMAT));
+        blyskawica.dodaj(new Mini("ekspres", 4, AUTOMAT));
 
         ListaZamowien listaBlyskawicy = blyskawica.pobierzListeZamowien();
 
         System.out.println("Lista zamówień klienta " + listaBlyskawicy);
 
         Koszyk koszykBlyskawicy = blyskawica.pobierzKoszyk();
+
+
+        //dodatkowe sprawdzenie czy cena wyliczana jest poprawnie przy pozniejszej zmianie statusu abonamentu klienta
+        blyskawica.setHasAbonament(false);
+        System.out.println("Lista zamówień klienta " + listaBlyskawicy);
+
+        blyskawica.setHasAbonament(true);
+
+
         blyskawica.przepakuj();
         System.out.println("Po przepakowaniu, lista zamówień klienta " + blyskawica.pobierzListeZamowien());
 
@@ -86,15 +92,20 @@ public class Main {
         System.out.println("Po przepakowaniu, koszyk klienta " + zolwik.pobierzKoszyk());
 
         // klient Żółwik płaci
-        zolwik.zaplac(PRZELEW);	// płaci przelewem, bez prowizji
+        zolwik.zaplac(PRZELEW);    // płaci przelewem, bez prowizji
 
         // Ile klientowi Żółwik zostało pieniędzy?
         System.out.println("Po zapłaceniu, klientowi Żółwik zostało: " + zolwik.pobierzPortfel() + " zł");
 
+        //sprawdzamy liste zrealizowanych oplaconych zamowien
+        System.out.println("LISTA POPRZEDNICH ZAMOWIEN " + zolwik.getPoprzednioZamowione());
+
         // Co zostało w koszyku klienta Żółwik (za mało pieniędzy miał)
         System.out.println("Po zapłaceniu, koszyk klienta " + koszykZolwika);
 
-        zolwik.zwroc(MINI, "zwykly", 1, KURIER);	// zwrot (do koszyka) 1 przesyłki mini zwykłej (z dostawą od kuriera) z ostatniej transakcji
+
+        zolwik.zwroc(MINI, "zwykly", 1, KURIER);
+        zolwik.zwroc(MINI, "zwyklyy", 1, KURIER);    // zwrot (do koszyka) 1 przesyłki mini zwykłej (z dostawą od kuriera) z ostatniej transakcji
 
         // Ile klientowi Zółwik zostało pieniędzy?
         System.out.println("Po zwrocie, klientowi Zółwik zostało: " + zolwik.pobierzPortfel() + " zł");

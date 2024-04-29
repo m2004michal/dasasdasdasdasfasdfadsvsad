@@ -9,31 +9,25 @@ import java.util.List;
 
 
 public abstract class Przesylka {
-    private RozmiarPrzesylki rozmiarPrzesylki;
-    private String typPrzesylki;
+    private final RozmiarPrzesylki rozmiarPrzesylki;
+    private final String typPrzesylki;
     private int ilosc;
-    private SposobDostawy sposobDostawy;
+    private final SposobDostawy sposobDostawy;
     private boolean hasAbonament;
-    public int getIlosc() {
-        return ilosc;
-    }
 
-    public void setIlosc(int ilosc) {
-        this.ilosc = ilosc;
-    }
+    private double cena;
 
-    public void setHasAbonament(boolean hasAbonament) {
-        this.hasAbonament = hasAbonament;
-    }
 
     public Przesylka(String typPrzesylki, int ilosc, SposobDostawy sposobDostawy, RozmiarPrzesylki rozmiarPrzesylki) {
         this.typPrzesylki = typPrzesylki;
         this.ilosc = ilosc;
         this.sposobDostawy = sposobDostawy;
         this.rozmiarPrzesylki = rozmiarPrzesylki;
+        wyliczAktualnaCene();
     }
-    public double calculatePrice(boolean hasAbonament){
-        List<ProduktWCenniku> produkty = Cennik.getInstance()
+
+    public double calculatePrice(boolean hasAbonament) {
+        List<ProduktWCenniku> produkty = Cennik.pobierzCennik()
                 .getListaCen()
                 .stream()
                 .filter(x -> this.rozmiarPrzesylki == x.getRozmiarPrzesylki() &&
@@ -61,5 +55,33 @@ public abstract class Przesylka {
 
     public String getTypPrzesylki() {
         return typPrzesylki;
+    }
+
+    public int getIlosc() {
+        return ilosc;
+    }
+
+    public void setIlosc(int ilosc) {
+        this.ilosc = ilosc;
+    }
+
+    public void setHasAbonament(boolean hasAbonament) {
+        this.hasAbonament = hasAbonament;
+    }
+
+    public RozmiarPrzesylki getRozmiarPrzesylki() {
+        return rozmiarPrzesylki;
+    }
+
+    public SposobDostawy getSposobDostawy() {
+        return sposobDostawy;
+    }
+
+    public void wyliczAktualnaCene() {
+        cena = calculatePrice(this.hasAbonament);
+    }
+
+    public double getCena() {
+        return cena;
     }
 }

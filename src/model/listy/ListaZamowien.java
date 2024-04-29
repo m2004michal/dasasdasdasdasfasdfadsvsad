@@ -1,20 +1,61 @@
 package model.listy;
 
-import model.Klient;
 import model.przesylki.Przesylka;
 
 import java.util.ArrayList;
 
-public class ListaZamowien extends KoszykoLista{
+public class ListaZamowien {
 
-    public ListaZamowien(Klient klient) {
-        super(new ArrayList<>(), klient);
+    private ArrayList<Przesylka> przesylki;
+    private final String nazwaWlascicielaKoszyka;
+
+    public ListaZamowien(String nazwaWlascicielaKoszyka) {
+        przesylki = new ArrayList<>();
+        this.nazwaWlascicielaKoszyka = nazwaWlascicielaKoszyka;
     }
 
-    public void dodajDoListy(Przesylka przesylka){
-        getPrzesylki().add(przesylka);
+    public void dodajDoListy(Przesylka przesylkaDoDodania) {
+        Przesylka przesylkaDoListy = przesylki.stream()
+                .filter(przesylka -> przesylka.getTypPrzesylki().equals(przesylkaDoDodania.getTypPrzesylki()) &&
+                        przesylka.getSposobDostawy().equals(przesylkaDoDodania.getSposobDostawy()) &&
+                        przesylka.getRozmiarPrzesylki().equals(przesylkaDoDodania.getRozmiarPrzesylki()))
+                .findFirst()
+                .map(przesylka -> {
+                    przesylka.setIlosc(przesylka.getIlosc() + przesylkaDoDodania.getIlosc());
+                    przesylki.remove(przesylka);
+                    return przesylka;
+                })
+                .orElse(przesylkaDoDodania);
+        przesylki.add(przesylkaDoListy);
+
     }
-    public void ustawListe(ArrayList<Przesylka> przesylkiZListy) {
-        setPrzesylki(przesylkiZListy);
+
+
+    @Override
+    public String toString() {
+        StringBuilder przesylkiDoWydruku = new StringBuilder();
+        if (przesylki.isEmpty())
+            return "-- pusto";
+        for (Przesylka przesylka : przesylki) {
+            przesylkiDoWydruku.append(przesylka.toString()).append("\n");
+        }
+        return getNazwaWlascicielaKoszyka() + "\n" + przesylkiDoWydruku;
     }
+
+    public ArrayList<Przesylka> getPrzesylki() {
+        return przesylki;
+    }
+
+    public void setPrzesylki(ArrayList<Przesylka> przesylki) {
+        this.przesylki = przesylki;
+    }
+
+    public String getNazwaWlascicielaKoszyka() {
+        return nazwaWlascicielaKoszyka;
+    }
+
+    public void ustawListe(ArrayList<Przesylka> nowaListaZyczen) {
+        setPrzesylki(nowaListaZyczen);
+    }
+
 }
